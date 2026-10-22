@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Transactions')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}" th:with="activePage='transactions'"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="page-header">
+        <h2>Transactions</h2>
+        <a th:href="@{/transactions/new}" class="btn btn-primary">+ Add Transaction</a>
+    </div>
+
+    <div th:if="${transactions.isEmpty()}" class="empty-state">
+        No transactions found. <a th:href="@{/transactions/new}">Add your first one.</a>
+    </div>
+
+    <div th:unless="${transactions.isEmpty()}" class="section-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th class="text-right">Amount</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="t : ${transactions}">
+                    <td th:text="${#temporals.format(t.transactionDate,'dd MMM yyyy')}"></td>
+                    <td th:text="${t.category.name}"></td>
+                    <td th:text="${t.description ?: '-'}"></td>
+                    <td>
+                        <span th:text="${t.type}" th:classappend="${t.type.name() == 'INCOME'} ? 'badge-income' : 'badge-expense'" class="badge"></span>
+                    </td>
+                    <td class="text-right"
+                        th:text="'$' + ${#numbers.formatDecimal(t.amount, 1, 'COMMA', 2, 'POINT')}"
+                        th:classappend="${t.type.name() == 'INCOME'} ? 'text-income' : 'text-expense'"></td>
+                    <td class="text-center action-col">
+                        <a th:href="@{/transactions/{id}/edit(id=${t.id})}" class="btn-icon" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form th:action="@{/transactions/{id}/delete(id=${t.id})}" method="post" style="display:inline">
+                            <button type="submit" class="btn-icon btn-icon-danger" title="Delete"
+                                    onclick="return confirm('Delete this transaction?')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="pagination" th:if="${transactions.totalPages > 1}">
+            <a th:href="@{/transactions(page=${transactions.number - 1})}"
+               th:classappend="${transactions.first} ? 'disabled'"
+               class="page-link">&lsaquo; Prev</a>
+            <span th:each="i : ${#numbers.sequence(0, transactions.totalPages - 1)}">
+                <a th:href="@{/transactions(page=${i})}"
+                   th:text="${i + 1}"
+                   th:classappend="${i == transactions.number} ? 'active'"
+                   class="page-link"></a>
+            </span>
+            <a th:href="@{/transactions(page=${transactions.number + 1})}"
+               th:classappend="${transactions.last} ? 'disabled'"
+               class="page-link">Next &rsaquo;</a>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

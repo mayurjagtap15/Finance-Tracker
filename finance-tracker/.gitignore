@@ -1,0 +1,27 @@
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.DS_Store
+
+# Logs
+*.log
+logs/
+
+# H2 database files
+*.db
+*.mv.db
+*.trace.db

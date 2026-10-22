@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}" th:with="activePage='dashboard'"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="page-header">
+        <h2>Dashboard</h2>
+        <span class="page-sub" th:text="'Welcome back, ' + ${user.fullName}"></span>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="cards-grid">
+        <div class="card card-income">
+            <div class="card-icon"><i class="bi bi-arrow-down-circle-fill"></i></div>
+            <div class="card-body">
+                <p class="card-label">Income (this month)</p>
+                <p class="card-value" th:text="'$' + ${#numbers.formatDecimal(dashboard.totalIncome, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+            </div>
+        </div>
+        <div class="card card-expense">
+            <div class="card-icon"><i class="bi bi-arrow-up-circle-fill"></i></div>
+            <div class="card-body">
+                <p class="card-label">Expenses (this month)</p>
+                <p class="card-value" th:text="'$' + ${#numbers.formatDecimal(dashboard.totalExpense, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+            </div>
+        </div>
+        <div class="card" th:classappend="${dashboard.balance >= 0} ? 'card-balance-pos' : 'card-balance-neg'">
+            <div class="card-icon"><i class="bi bi-wallet2"></i></div>
+            <div class="card-body">
+                <p class="card-label">Balance (this month)</p>
+                <p class="card-value" th:text="'$' + ${#numbers.formatDecimal(dashboard.balance, 1, 'COMMA', 2, 'POINT')}">$0.00</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <h3 class="chart-title">Monthly Overview (6 months)</h3>
+            <canvas id="monthlyChart" height="120"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3 class="chart-title">Expenses by Category</h3>
+            <canvas id="categoryChart" height="120"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent transactions -->
+    <div class="section-card">
+        <div class="section-header">
+            <h3>Recent Transactions</h3>
+            <a th:href="@{/transactions/new}" class="btn btn-primary btn-sm">+ Add Transaction</a>
+        </div>
+        <div th:if="${#lists.isEmpty(dashboard.recentTransactions)}" class="empty-state">
+            No transactions yet. <a th:href="@{/transactions/new}">Add one now.</a>
+        </div>
+        <table th:unless="${#lists.isEmpty(dashboard.recentTransactions)}" class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th class="text-right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="t : ${dashboard.recentTransactions}">
+                    <td th:text="${#temporals.format(t.transactionDate,'dd MMM yyyy')}"></td>
+                    <td th:text="${t.description ?: '-'}"></td>
+                    <td>
+                        <span th:text="${t.type}" th:classappend="${t.type.name() == 'INCOME'} ? 'badge-income' : 'badge-expense'" class="badge"></span>
+                    </td>
+                    <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(t.amount, 1, 'COMMA', 2, 'POINT')}"
+                        th:classappend="${t.type.name() == 'INCOME'} ? 'text-income' : 'text-expense'"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="section-footer">
+            <a th:href="@{/transactions}">View all transactions →</a>
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    const monthLabels   = /*[[${dashboard.monthLabels}]]*/ [];
+    const monthlyIncome = /*[[${dashboard.monthlyIncome}]]*/ [];
+    const monthlyExpense= /*[[${dashboard.monthlyExpense}]]*/ [];
+    const categoryLabels= /*[[${dashboard.expenseByCategory.keySet()}]]*/ [];
+    const categoryData  = /*[[${dashboard.expenseByCategory.values()}]]*/ [];
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script th:src="@{/js/charts.js}"></script>
+</body>
+</html>

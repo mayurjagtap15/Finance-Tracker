@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Categories')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}" th:with="activePage='categories'"></nav>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="page-header">
+        <h2>Categories</h2>
+        <a th:href="@{/categories/new}" class="btn btn-primary">+ Add Category</a>
+    </div>
+
+    <div class="section-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Icon</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Owner</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="c : ${categories}">
+                    <td><i th:classappend="${c.icon}" class="bi"></i></td>
+                    <td th:text="${c.name}"></td>
+                    <td>
+                        <span th:text="${c.type}" th:classappend="${c.type.name() == 'INCOME'} ? 'badge-income' : 'badge-expense'" class="badge"></span>
+                    </td>
+                    <td th:text="${c.user != null} ? ${c.user.username} : 'System'"></td>
+                    <td class="text-center">
+                        <form th:if="${c.user != null}"
+                              th:action="@{/categories/{id}/delete(id=${c.id})}" method="post" style="display:inline">
+                            <button type="submit" class="btn-icon btn-icon-danger" title="Delete"
+                                    onclick="return confirm('Delete this category?')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        <span th:unless="${c.user != null}" class="text-muted">—</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>
